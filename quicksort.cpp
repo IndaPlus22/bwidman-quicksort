@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <cmath>
 
@@ -7,17 +8,11 @@
 // Doesn't work with multiple spaces in between numbers or space in beginning (i.e. application specific)
 void split(std::vector<int>& values, const std::string& string) {
     values.reserve((string.length() + 1) / 2);
+    std::stringstream ss(string);
+    std::string item;
 
-    std::string buffer = "";
-    for (int i = 0; i < string.length(); i++) {
-        if (string[i] == ' ' || i == string.length() - 1) {
-            if (i == string.length() - 1)
-                buffer.push_back(string[i]);
-            values.push_back(stoi(buffer));
-            buffer.clear();
-        }
-        else
-            buffer.push_back(string[i]);
+    while (getline(ss, item, ' ')) {
+        values.push_back(stoi(item));
     }
 }
 
@@ -27,17 +22,52 @@ void swap(std::vector<int>& list, int index1, int index2) {
     list[index2] = temp;
 }
 
+void insertionSort(std::vector<int>& list, int lo, int hi) {
+    // for (int i = lo + 1; i <= hi; i++) { // "Faster" version??
+    //     int x = list[i];
+    //     int j = i - 1;
+    //     while (j >= 0 && list[j] > x) {
+    //         list[j + 1] = list[j];
+    //         j--;
+    //     }
+    //     list[j + 1] = x;
+    // }
+    for (int i = lo + 1; i <= hi; i++)
+        for (int j = i; j > 0 && list[j-1] > list[j]; j--)
+            swap(list, j, j - 1);
+}
+
+int medianOf3(int a, int b, int c) {
+    if ((a > b) ^ (a > c))
+        return a;
+    else if ((b < a) ^ (b < c))
+        return b;
+    else
+        return c;
+}
+
+int ninther(std::vector<int>& list, int lo, int hi) {
+    int third = int((hi - lo) / 3.0f);
+    return medianOf3(
+        medianOf3(list[lo], list[int((lo + third) / 2.0f)], list[lo + third]), // First third
+        medianOf3(list[lo + third + 1], list[lo + int((third + 1 + 2 * third) / 2.0f)], list[lo + 2 * third]), // Middle third
+        medianOf3(list[lo + 2 * third + 1], list[int((2 * third + 1 + hi) / 2.0f)], list[hi]) // Last third
+    );
+}
+
 int partition(std::vector<int>& list, int lo, int hi) {
     // Choose pivot element
-    int pivot = list[floor((hi + lo) / 2.0f)]; // Value in the middle
+    // int pivot = list[floor((hi + lo) / 2.0f)]; // Value in the middle
+    // int pivot = medianOf3(list[lo], list[floor((hi + lo) / 2.0f)], list[hi]);
+    int pivot = ninther(list, lo, hi);
 
     int left = lo - 1;
     int right = hi + 1;
 
     while (true) {
-        do { left++; } while (list[left] < pivot);
+        while (list[++left] < pivot);
 
-        do { right--; } while (list[right] > pivot);
+        while (list[--right] > pivot);
 
         if (left >= right) // Return pivot if crossed
             return right;
@@ -47,7 +77,9 @@ int partition(std::vector<int>& list, int lo, int hi) {
 }
 
 void quicksort(std::vector<int>& list, int lo, int hi) {
-    if (lo >= 0 && hi >= 0 && lo < hi) {
+    if (hi - lo < 32) {
+        insertionSort(list, lo, hi);
+    } else if (lo >= 0 && hi >= 0 && lo < hi) {
         int pivot = partition(list, lo, hi);
         quicksort(list, lo, pivot);
         quicksort(list, pivot + 1, hi);
