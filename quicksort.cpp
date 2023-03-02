@@ -1,28 +1,12 @@
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <cmath>
 
-// Splits string with space seperated numbers
-// Doesn't work with multiple spaces in between numbers or space in beginning (i.e. application specific)
-void split(std::vector<int>& values, const std::string& string) {
-    values.reserve((string.length() + 1) / 2);
-    std::stringstream ss(string);
-    std::string item;
-
-    while (getline(ss, item, ' ')) {
-        values.push_back(stoi(item));
-    }
-}
-
-void swap(std::vector<int>& list, int index1, int index2) {
+void swap(int list[], int index1, int index2) {
     int temp = list[index1];
     list[index1] = list[index2];
     list[index2] = temp;
 }
 
-void insertionSort(std::vector<int>& list, int lo, int hi) {
+void insertionSort(int list[], int lo, int hi) {
     // for (int i = lo + 1; i <= hi; i++) { // "Faster" version??
     //     int x = list[i];
     //     int j = i - 1;
@@ -46,7 +30,7 @@ int medianOf3(int a, int b, int c) {
         return c;
 }
 
-int ninther(std::vector<int>& list, int lo, int hi) {
+int ninther(int list[], int lo, int hi) {
     int third = int((hi - lo) / 3.0f);
     return medianOf3(
         medianOf3(list[lo], list[int((lo + third) / 2.0f)], list[lo + third]), // First third
@@ -55,11 +39,11 @@ int ninther(std::vector<int>& list, int lo, int hi) {
     );
 }
 
-int partition(std::vector<int>& list, int lo, int hi) {
+int partition(int list[], int lo, int hi) {
     // Choose pivot element
-    // int pivot = list[floor((hi + lo) / 2.0f)]; // Value in the middle
+    int pivot = list[int((hi + lo) / 2.0f)]; // Value in the middle
     // int pivot = medianOf3(list[lo], list[floor((hi + lo) / 2.0f)], list[hi]);
-    int pivot = ninther(list, lo, hi);
+    // int pivot = ninther(list, lo, hi);
 
     int left = lo - 1;
     int right = hi + 1;
@@ -76,7 +60,7 @@ int partition(std::vector<int>& list, int lo, int hi) {
     }
 }
 
-void quicksort(std::vector<int>& list, int lo, int hi) {
+void quicksort(int list[], int lo, int hi) {
     if (hi - lo < 32) {
         insertionSort(list, lo, hi);
     } else if (lo >= 0 && hi >= 0 && lo < hi) {
@@ -87,20 +71,24 @@ void quicksort(std::vector<int>& list, int lo, int hi) {
 }
 
 int main() {
-    std::string input;
-    std::getline(std::cin, input);
-
-    std::vector<int> values{};
-    split(values, input);
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
     
-    swap(values, 0, values.size() - 1); // Remove first value (list size) fast
-    values.pop_back();
+    int length;
+    std::cin >> length;
+    
+    int* values = new int[length];
+
+    int i = 0;
+    int value;
+    while (std::cin >> value)
+        values[i++] = value;
 
     // Sort list of numbers
-    quicksort(values, 0, values.size() - 1);
+    quicksort(values, 0, length - 1);
 
     // Print sorted list
-    for (int i = 0; i < values.size(); i++) {
+    for (int i = 0; i < length; i++) {
         std::cout << values[i] << " ";
     }
     std::cout << std::endl;
